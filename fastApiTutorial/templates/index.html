@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>좋아요 대회</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.css"
+    />
+    <script src="https://cdn.jsdelivr.net/npm/semantic-ui@2.4.2/dist/semantic.min.js"></script>
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"
+    />
+    <style>
+      .heart-btn {
+        color: #ccc;
+        transition: color 0.3s ease;
+      }
+
+      .heart-btn {
+        color: #ff0000;
+      }
+
+      .button-link {
+        display: inline-block;
+        padding: 10px 20px;
+        margin: 5px 0;
+        background-color: #007bff;
+        color: white;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 5px;
+      }
+      .button-link:hover {
+        background-color: #0056b3;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div style="margin-top: 50px" class="ui container">
+      <h1>좋아요 대회</h1>
+      <form class="ui form" action="/add" method="post">
+        <div class="field">
+          <input type="text" name="title" placeholder="제목을 입력해주세요." />
+          <input
+            type="text"
+            name="img"
+            placeholder="이미지 경로를 입력해주세요(없으면 피카츄)"
+          />
+          <br />
+        </div>
+        <button class="ui blue button" type="submit">Add</button>
+      </form>
+
+      <hr />
+      <h1>로그인한 ID : {{ user_id }}</h1>
+
+      {% for todo in todos %}
+      <div class="ui segment">
+        <!-- Apply the "completed" class to the <p> tag if todo.complete is True -->
+        <p class="ui big header">
+          {{ todo.id }} | {{ todo.task }} | 유저아이디 : {{ todo.uid }}
+        </p>
+        <img style="width: 200px; height: 150px" src="{{ todo.img }}" />
+
+        <!-- <a class="ui red button" href="/delete/{{ todo.id }}">Delete</a> -->
+
+        <!-- 좋아요 버튼 -->
+        <form
+          action="/like/{{ todo.id }}"
+          method="post"
+          style="display: inline"
+        >
+          <button
+            type="submit"
+            class="heart-btn{% if todo.likes > 0 %} clicked{% endif %}"
+          >
+            {% if todo.likes > 0 %}
+            <i class="fas fa-heart"></i>
+            {% else %}
+            <i class="far fa-heart"></i>
+            {% endif %}
+          </button>
+          <a class="like_count" href="#" onclick="showModal('{{ todo.id }}')"
+            >{{ todo.likes }}</a
+          >
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+
+    <form action="/logout" method="post">
+      <button type="submit" class="button-link">Logout</button>
+    </form>
+  </body>
+
+  <script>
+    function showModal(todoId) {
+      fetch(`/like/${todoId}/list`)
+        .then((response) => response.json())
+        .then((data) => {
+          let modalContent = "";
+          data.like_list.forEach((item) => {
+            modalContent += `유저 ${item.liked_user} : ${item.liked_count} 번\n`;
+          });
+          alert(modalContent); // 모달 대신에 팝업으로 표시 (alert 사용 예시)
+        })
+        .catch((error) => console.error("Error:", error));
+    }
+  </script>
+</html>
